@@ -26,7 +26,11 @@ subtest 'Not logged in' => sub {
       ->json_is('/not_auth'      => 1, '!auth passes when not logged in')
       ->json_is('/public_menu'   => 1, 'empty condition always passes')
       ->json_is('/admin_only'    => 0, 'group:admin fails (not authenticated)')
-      ->json_is('/perm_required' => 0, 'perm:menu_read fails (not authenticated)');
+      ->json_is('/perm_required' => 0, 'perm:menu_read fails (not authenticated)')
+      ->json_is('/mode_dev'      => 1, 'mode:development passes (app is in dev)')
+      ->json_is('/mode_prod'     => 0, 'mode:production fails (app is in dev)')
+      ->json_is('/mode_not_prod' => 1, 'mode:!production passes (app is in dev)')
+      ->json_is('/compound'      => 0, 'compound group:admin,mode:dev fails (no auth)');
 };
 
 # -- 2. Logged in as guest (no group, no perms) --------------------------
@@ -41,7 +45,11 @@ subtest 'Guest (no group, no perms)' => sub {
       ->json_is('/not_auth'      => 0, '!auth fails when logged in')
       ->json_is('/public_menu'   => 1, 'empty condition always passes')
       ->json_is('/admin_only'    => 0, 'group:admin fails (guest not in admin group)')
-      ->json_is('/perm_required' => 0, 'perm:menu_read fails (guest has no perms)');
+      ->json_is('/perm_required' => 0, 'perm:menu_read fails (guest has no perms)')
+      ->json_is('/mode_dev'      => 1, 'mode:development passes (app is in dev)')
+      ->json_is('/mode_prod'     => 0, 'mode:production fails (app is in dev)')
+      ->json_is('/mode_not_prod' => 1, 'mode:!production passes (app is in dev)')
+      ->json_is('/compound'      => 0, 'compound fails (guest not admin)');
 };
 
 # -- 3. Logged in as reader (in readers group, has menu_read, NOT in admin) -
@@ -56,7 +64,9 @@ subtest 'Reader (has menu_read, not in admin group)' => sub {
       ->json_is('/not_auth'      => 0, '!auth fails')
       ->json_is('/public_menu'   => 1, 'empty condition always passes')
       ->json_is('/admin_only'    => 0, 'group:admin fails (reader not in admin group)')
-      ->json_is('/perm_required' => 1, 'perm:menu_read passes (reader has menu_read)');
+      ->json_is('/perm_required' => 1, 'perm:menu_read passes (reader has menu_read)')
+      ->json_is('/mode_dev'      => 1, 'mode:development passes')
+      ->json_is('/compound'      => 0, 'compound fails (reader not admin)');
 };
 
 # -- 4. Logged in as admin (in admin group, has menu_read) ---------------
@@ -71,7 +81,9 @@ subtest 'Admin (in admin group, has menu_read)' => sub {
       ->json_is('/not_auth'      => 0, '!auth fails')
       ->json_is('/public_menu'   => 1, 'empty condition always passes')
       ->json_is('/admin_only'    => 1, 'group:admin passes (admin is in admin group)')
-      ->json_is('/perm_required' => 1, 'perm:menu_read passes (admin has menu_read)');
+      ->json_is('/perm_required' => 1, 'perm:menu_read passes (admin has menu_read)')
+      ->json_is('/mode_dev'      => 1, 'mode:development passes')
+      ->json_is('/compound'      => 1, 'compound group:admin,mode:dev passes');
 };
 
 # -- 5. Back to anonymous — grants cleared -------------------------------
@@ -83,7 +95,8 @@ subtest 'Anonymous after logout' => sub {
       ->status_is(200)
       ->json_is('/authenticated' => 0, 'not authenticated after logout')
       ->json_is('/auth_required' => 0, 'auth fails')
-      ->json_is('/not_auth'      => 1, '!auth passes');
+      ->json_is('/not_auth'      => 1, '!auth passes')
+      ->json_is('/mode_dev'      => 1, 'mode:development still passes');
 };
 
 done_testing;

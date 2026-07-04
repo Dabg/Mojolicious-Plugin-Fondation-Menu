@@ -91,22 +91,12 @@ sub register_all ($class, $app) {
     # ── check_menu_condition ────────────────────────────────────────────
     $app->helper(check_menu_condition => sub ($c, $condition) {
         return 1 unless defined $condition && length $condition;
-        if ($condition eq 'auth') {
-            return $c->has_helper('is_user_authenticated')
-                ? $c->is_user_authenticated : 0;
+
+        # Support comma-separated compound conditions (AND logic)
+        for my $cond (split /\s*,\s*/, $condition) {
+            return 0 unless _check_single_menu_condition($c, $cond);
         }
-        if ($condition eq '!auth') {
-            return $c->has_helper('is_user_authenticated')
-                ? !$c->is_user_authenticated : 1;
-        }
-        if ($condition =~ /^group:(.+)$/) {
-            return $c->check_group($1);
-        }
-        if ($condition =~ /^perm:(.+)$/) {
-            return $c->check_perm($1);
-        }
-        $c->app->log->warn("Unknown menu condition format: $condition");
-        return 0;
+        return 1;
     });
 
     # ── render_menu_breadcrumb ──────────────────────────────────────────
@@ -134,6 +124,32 @@ sub register_all ($class, $app) {
 # ══════════════════════════════════════════════════════════════════════════
 # Internal
 # ══════════════════════════════════════════════════════════════════════════
+
+# Check a single menu condition (no comma splitting).
+sub _check_single_menu_condition ($c, $cond) {
+    if ($cond eq 'auth') {
+        return $c->has_helper('is_user_authenticated')
+            ? $c->is_user_authenticated : 0;
+    }
+    if ($cond eq '!auth') {
+        return $c->has_helper('is_user_authenticated')
+            ? !$c->is_user_authenticated : 1;
+    }
+    if ($cond =~ /^group:(.+)$/) {
+        return $c->check_group($1);
+    }
+    if ($cond =~ /^perm:(.+)$/) {
+        return $c->check_perm($1);
+    }
+    if ($cond =~ /^mode:!(.+)$/) {
+        return $c->app->mode ne $1;
+    }
+    if ($cond =~ /^mode:(.+)$/) {
+        return $c->app->mode eq $1;
+    }
+    $c->app->log->warn("Unknown menu condition format: $cond");
+    return 0;
+}
 
 sub _build_menus_cache ($c, $cache_ref, $loaded_ref) {
     my $schema = $c->schema;

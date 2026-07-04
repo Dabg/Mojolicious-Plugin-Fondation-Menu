@@ -99,11 +99,15 @@ sub startup {
     $r->get('/menu-conditions')->to(cb => sub ($c) {
         $c->render(json => {
             authenticated      => $c->is_user_authenticated ? \1 : \0,
-            admin_only         => $c->check_menu_condition('group:admin')   ? \1 : \0,
-            perm_required      => $c->check_menu_condition('perm:menu_read')? \1 : \0,
-            auth_required      => $c->check_menu_condition('auth')          ? \1 : \0,
-            public_menu        => $c->check_menu_condition('')              ? \1 : \0,
-            not_auth           => $c->check_menu_condition('!auth')         ? \1 : \0,
+            admin_only         => $c->check_menu_condition('group:admin')          ? \1 : \0,
+            perm_required      => $c->check_menu_condition('perm:menu_read')       ? \1 : \0,
+            auth_required      => $c->check_menu_condition('auth')                 ? \1 : \0,
+            public_menu        => $c->check_menu_condition('')                     ? \1 : \0,
+            not_auth           => $c->check_menu_condition('!auth')                ? \1 : \0,
+            mode_dev           => $c->check_menu_condition('mode:development')     ? \1 : \0,
+            mode_prod          => $c->check_menu_condition('mode:production')      ? \1 : \0,
+            mode_not_prod      => $c->check_menu_condition('mode:!production')     ? \1 : \0,
+            compound           => $c->check_menu_condition('group:admin,mode:development') ? \1 : \0,
         });
     });
 
