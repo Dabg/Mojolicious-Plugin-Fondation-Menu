@@ -18,19 +18,10 @@ sub fondation_meta {
                 menu => { source => 'Menu', backend => undef },
             },
             fondation_init    => [
-                ['db', 'prepare', '-y'],
-                ['db', 'install'],
                 ['menu', 'sync'],
-                ['db', 'populate'],
             ],
             fondation_upgrade => [
-                ['db', 'prepare', '-y', '-a'],
-                ['db', 'upgrade'],
                 ['menu', 'sync'],
-                ['db', 'populate'],
-            ],
-            fondation_clean => [
-                'share/migrations',
             ],
         },
     };
