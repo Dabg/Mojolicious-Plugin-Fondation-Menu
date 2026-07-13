@@ -7,8 +7,6 @@ use Mojo::Base 'Mojolicious::Command', -signatures;
 use Mojo::File 'path';
 use Mojo::JSON qw(decode_json);
 
-our $VERSION = '0.01';
-
 has description => 'Sync menu entries from share/menus.json';
 has usage       => sub ($self) {
     <<"USAGE";
