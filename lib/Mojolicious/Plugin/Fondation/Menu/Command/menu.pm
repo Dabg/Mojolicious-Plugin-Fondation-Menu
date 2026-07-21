@@ -77,9 +77,12 @@ sub _sync ($self, $app, @args) {
         my $schema_class = $be->{schema_class};
         require Module::Runtime;
         Module::Runtime::require_module($schema_class);
+        my %extra;
+        $extra{quote_char} = $be->{quote_char} if $be->{quote_char};
         $schema = $schema_class->connect(
             $be->{dsn}, $be->{user}, $be->{pass},
             $be->{dbi_attrs} // {},
+            \%extra,
         );
     };
     if ($@) {
@@ -122,7 +125,7 @@ sub _sync ($self, $app, @args) {
         my $order = $entry->{order};
         unless (defined $order) {
             $order = ($rs->search({
-                parent_id => 0,
+                parent_id => undef,
                 name      => $name,
             })->get_column('sort_order')->max // -1) + 1;
         }
@@ -135,7 +138,7 @@ sub _sync ($self, $app, @args) {
             name        => $name,
             condition   => $entry->{condition}   || '',
             sort_order  => $order,
-            parent_id   => 0,
+            parent_id   => undef,
             open_tab    => $entry->{open_tab}    ? 1 : 0,
             view_in_menu => exists $entry->{view_in_menu}
                             ? ($entry->{view_in_menu} ? 1 : 0) : 1,

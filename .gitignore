@@ -1,3 +1,4 @@
 /.build/
 /Mojolicious-Plugin-*-*/
 /*.tar.gz
+/t/data/

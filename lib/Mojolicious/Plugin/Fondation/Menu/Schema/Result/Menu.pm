@@ -107,8 +107,7 @@ __PACKAGE__->add_columns(
 
     parent_id => {
         data_type     => 'integer',
-        is_nullable   => 0,
-        default_value => 0,
+        is_nullable   => 1,
         extra         => {
             openapi => {
                 description => 'Parent menu ID (0 for root)',
